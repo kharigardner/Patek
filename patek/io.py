@@ -9,15 +9,16 @@ from pyspark.sql.dataframe import DataFrame as SparkDataFrame
 from pyspark.sql import SparkSession
 from pyspark.context import SparkContext
 from .exceptions import InvalidArgumentError
-
+from pyspark.sql import types
+import ujson
 
 def superDeltaWriter(
     dataframe: SparkDataFrame,
     key_cols: list,
     path,
+    spark: SparkSession,
+    sparkcontext: SparkContext,
     update_cols: list = None,
-    spark: SparkSession = spark,
-    sparkcontext: SparkContext = sc,
 ):
     # lets initialize logging first for this function
     logger4J = sparkcontext._jvm.org.apache.log4j
@@ -66,3 +67,39 @@ def superDeltaWriter(
         print(f"Updated delta table at {path}.")
     finally:
         print("Finished writing to delta table.")
+
+
+# Map JSON schema types to Spark types
+TYPE_MAPPING = {
+    "str": types.StringType(),
+    "int": types.IntegerType(),
+    "dec": types.FloatType(),
+    "boolean": types.BooleanType(),
+    "timestamp": types.TimestampType(),
+    "date": types.DateType()
+}
+
+
+def funnelSparkler(json_schema_path: str, csv_path: str) -> SparkDataFrame:
+    # Create a Spark session
+    spark = SparkSession.builder.getOrCreate()
+
+    # Read the JSON schema file from the Hadoop file system
+    json_schema_df = spark.read.json(json_schema_path)
+
+    # Convert the JSON schema types to Spark types
+    schema = [
+        types.StructField(row["name"], TYPE_MAPPING[row["type"]], nullable=False)
+        for row in json_schema_df.collect()
+    ]
+
+    # Use the schema to load the CSV file
+    df = (
+        spark.read.format("csv")
+        .option("header", "true")
+        .schema(types.StructType(schema))
+        .load(csv_path)
+    )
+
+    # Return the resulting DataFrame
+    return df
