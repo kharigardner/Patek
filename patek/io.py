@@ -23,6 +23,7 @@ def superDeltaWriter(
     logger4J = sparkcontext._jvm.org.apache.log4j
     logger = logger4J.LogManager.getLogger(__name__)
     try:
+        print("checking if the delta table exists")
         # checking if the delta table exists
         delta_table = delta.tables.DeltaTable.forPath(spark, path)
     except AnalysisException as e:
