@@ -13,4 +13,4 @@ jobs:
         python-version: 3.7
     - run: pip install pyspark
     - run: pip install delta-spark
-    - run: python -m unittest discover -v
+    - run: python tests/io_test.py -v
