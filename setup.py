@@ -7,6 +7,7 @@ setup(
     author_email = 'khgardner@proton.me',
     readme='README.md',
     description='A collection of utilities and tools for accelerating pyspark development and productivity.',
+    long_description=open('README.md').read(),
     url='https://github.com/kharigardner/Patek',
     packages=['patek'],
     install_requires=['pyspark', 'delta-spark']
