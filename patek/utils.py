@@ -43,3 +43,10 @@ def determine_key_candidates(dataframe: SparkDataFrame) -> list or str:
 
     # return the list of key candidates
     return key_candidates
+
+def column_cleaner(dataframe: SparkDataFrame) -> SparkDataFrame:
+    """
+    This function cleans the column names of a dataframe by replacing spaces with underscores and removing special characters.
+    """
+    dataframe = dataframe.toDF(*[c.replace(' ', '_').replace('.', '_').replace('-', '_').replace('(', '').replace(')', '').replace('%', '').replace(':', '') for c in dataframe.columns])
+    return dataframe

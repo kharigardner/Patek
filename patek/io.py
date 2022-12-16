@@ -47,6 +47,7 @@ def superDeltaWriter(
         merge_statement = " and ".join(merge_statements)
         # log the merge statement
         logger.info(f"Merge statement for table at {path} : {merge_statement}")
+        print(f'Merge statement for table at {path} : {merge_statement}')
         if update_cols:
             update_keys = {
                 col: f"source.{col}"
@@ -76,9 +77,17 @@ TYPE_MAPPING = {
     "dec": types.FloatType(),
     "boolean": types.BooleanType(),
     "timestamp": types.TimestampType(),
-    "date": types.DateType()}
+    "date": types.DateType(),
+}
 
-def funnelSparkler(json_schema_path: str, data_path: str, spark: SparkSession, sc: SparkContext, data_file_type: str = "csv") -> SparkDataFrame:
+
+def funnelSparkler(
+    json_schema_path: str,
+    data_path: str,
+    spark: SparkSession,
+    sc: SparkContext,
+    data_file_type: str = "csv",
+) -> SparkDataFrame:
     """
     This function is a light weight functional spark data source that can be used to read data from funnel.io exports and convert the specified schema to a spark dataframe, to avoid any ambiguity in schema inference.
     """
@@ -90,12 +99,24 @@ def funnelSparkler(json_schema_path: str, data_path: str, spark: SparkSession, s
     except AnalysisException as e:
         raise InvalidArgumentError("The JSON schema file does not exist.") from e
     else:
-        if ['name', 'type'] not in json_schema_df.columns:
-            raise InvalidArgumentError("The JSON schema file is not a valid Funnel schema file.")
+        if ["name", "type"] not in json_schema_df.columns:
+            raise InvalidArgumentError(
+                "The JSON schema file is not a valid Funnel schema file."
+            )
         else:
             # Convert the JSON schema types to Spark types
-            schema = [types.StructField(row["name"], TYPE_MAPPING[row["type"]], nullable=False) for row in json_schema_df.collect()]
+            schema = [
+                types.StructField(
+                    row["name"], TYPE_MAPPING[row["type"]], nullable=False
+                )
+                for row in json_schema_df.collect()
+            ]
         if data_file_type == "csv":
-            return spark.read.format("csv").option("header", "true").schema(types.StructType(schema)).load(data_path)
+            return (
+                spark.read.format("csv")
+                .option("header", "true")
+                .schema(types.StructType(schema))
+                .load(data_path)
+            )
         else:
             raise InvalidArgumentError("The data file type is not supported... yet!")
