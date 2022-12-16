@@ -55,10 +55,6 @@ def column_cleaner(dataframe: SparkDataFrame) -> SparkDataFrame:
 def _extracted_from_rearrange_columns_11(rdd, schema, spark: SparkContext):
     # use a map function to rearrange the columns of the rdd in the order of the schema
     rdd_rearranged = rdd.map(lambda x: [x[i] for i in schema.fieldNames() if i in x])
-    # check for extraneous columns
-    if len(rdd_rearranged.first()) > len(schema):
-        # remove extraneous columns
-        rdd_rearranged = rdd_rearranged.map(lambda x: x[:len(schema)])
     # assert that the columns are in the correct order
     for i in range(len(schema)):
         try:
