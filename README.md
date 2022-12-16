@@ -60,3 +60,17 @@ print(key_candidates)
 # a list containing single column key candidates: ['column1', 'column2', 'column3']
 # a list containing composite key candidates: [['column1', 'column2'], ['column1', 'column3']]
 ```
+
+#### *Clean Column Names*
+
+The column_cleaner function allows you to clean column names in a dataframe. It removes special characters and replaces spaces with underscores.
+
+```python
+from patek.utils import column_cleaner
+
+# input dataframe columns: ['column?? 1', 'column: 2', 'column-3']
+
+cleaned_dataframe = column_cleaner(sparkDataframe)
+
+# output dataframe columns: ['column_1', 'column_2', 'column_3']
+```
